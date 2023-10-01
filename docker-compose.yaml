@@ -48,7 +48,7 @@ services:
     restart: unless-stopped
     volumes:
       # - ./config/nginx:/etc/nginx/templates
-      - ./nginx/conf.d:/etc/config/nginx/conf.d/default.conf
+      - ./config/nginx/conf.d:/etc/config/nginx/conf.d/default.conf
       - .:/education_platform
       - static_volume:/education_platform/static
       - media_volume:/education_platform/media
