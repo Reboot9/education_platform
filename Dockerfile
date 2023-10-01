@@ -1,0 +1,24 @@
+FROM python:3.10
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONBUFFERED=1 \
+    POETRY_VERSION=1.4.2 \
+    POETRY_VIRTUALENVS_CREATE="false"
+
+RUN pip install "poetry==$POETRY_VERSION"
+
+WORKDIR /education_platform
+
+COPY pyproject.toml poetry.lock docker-entrypoint.sh ./
+
+RUN poetry install --no-interaction --no-ansi --no-dev
+
+COPY . /education_platform
+
+EXPOSE 8000
+RUN chmod +x wait-for-it.sh
+# RUN chmod +x docker-entrypoint.sh
+# ENTRYPOINT ["./docker-entrypoint.sh"]
+
+CMD ["gunicorn", "education_platform.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "4", "--threads", "4"]
+# RUN gunicorn education_platform.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4

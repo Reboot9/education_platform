@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "education-platform"
+version = "0.1.0"
+description = ""
+authors = ["Reboot <sergejskorikjr@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.4"
+python-dotenv = "^1.0.0"
+pillow = "^10.0.0"
+django-braces = "^1.15.0"
+django-embed-video = "^1.4.9"
+pymemcache = "^4.0.0"
+django-debug-toolbar = "^4.2.0"
+redis = "^5.0.0"
+django-redisboard = "^8.4.0"
+djangorestframework = "^3.14.0"
+requests = "^2.31.0"
+channels = "^4.0.0"
+daphne = "^4.0.0"
+channels-redis = "^4.1.0"
+psycopg2-binary = "^2.9.7"
+uwsgi = "^2.0.22"
+gunicorn = "^21.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
