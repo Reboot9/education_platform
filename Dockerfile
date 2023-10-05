@@ -17,8 +17,10 @@ COPY . /education_platform
 
 EXPOSE 8000
 RUN chmod +x wait-for-it.sh
+
+COPY ./static ./static
 # RUN chmod +x docker-entrypoint.sh
 # ENTRYPOINT ["./docker-entrypoint.sh"]
 
-CMD ["gunicorn", "education_platform.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "4", "--threads", "4"]
+# CMD ["gunicorn", "education_platform.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "4", "--threads", "4"]
 # RUN gunicorn education_platform.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4

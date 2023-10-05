@@ -31,7 +31,7 @@ services:
     volumes:
       - .:/education_platform
       - static_volume:/education_platform/static
-      - media_volume:/education_platform/media
+      # - media_volume:/education_platform/media
     ports:
       - "8000:8000"
     environment:
@@ -49,9 +49,10 @@ services:
     volumes:
       # - ./config/nginx:/etc/nginx/templates
       - ./config/nginx/conf.d:/etc/config/nginx/conf.d/default.conf
-      - .:/education_platform
-      - static_volume:/education_platform/static
-      - media_volume:/education_platform/media
+      # - .:/education_platform
+      - static_volume:/usr/share/nginx/html/static
+#      - static_volume:/education_platform/static
+#      - media_volume:/education_platform/media
     ports:
       - "80:80"
     command: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
@@ -60,4 +61,4 @@ services:
 
 volumes:
   static_volume:
-  media_volume:
+#  media_volume:

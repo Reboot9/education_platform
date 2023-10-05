@@ -12,7 +12,8 @@ server {
     }
 
     location /static/ {
-        alias /education_platform/static/;
+        alias /usr/share/nginx/html/static/;
+
     }
 
     location /media/ {
@@ -20,8 +21,8 @@ server {
     }
 
     types {
-        text/javascript js;
-        application/javascript js;
-        text/css css;
-    }
+            text/javascript js;
+            application/javascript js;
+            text/css css;
+        }
 }

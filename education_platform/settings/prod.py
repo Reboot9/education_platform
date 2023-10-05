@@ -20,6 +20,7 @@ DATABASES = {
         'PORT': 5432,
     }
 }
+STATIC_ROOT = BASE_DIR / 'static'
 
 REDIS_URL = 'redis://cache:6379'
 CACHES['default']['LOCATION'] = REDIS_URL
