@@ -8,14 +8,14 @@ services:
       - ./.env
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    networks:
+      - education_network
 
   cache:
     image: redis:7.0.4
     restart: unless-stopped
+    networks:
+      - education_network
     volumes:
       - .data/cache:/data
 
@@ -24,8 +24,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: [ "/education_platform/wait-for-it.sh", "db:5432", "--",
-               "gunicorn", "education_platform.wsgi:application", "-b", "0.0.0.0:8000"]
     env_file:
       - ./.env
     volumes:
@@ -34,11 +32,8 @@ services:
       # - media_volume:/education_platform/media
     ports:
       - "8000:8000"
-    environment:
-      - DJANGO_SETTINGS_MODULE=education_platform.settings.prod
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    networks:
+      - education_network
     depends_on:
       - db
       - cache
@@ -46,19 +41,29 @@ services:
   nginx:
     image: nginx:1.23.1
     restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./config/nginx/Dockerfile
     volumes:
       # - ./config/nginx:/etc/nginx/templates
       - ./config/nginx/conf.d:/etc/config/nginx/conf.d/default.conf
-      # - .:/education_platform
-      - static_volume:/usr/share/nginx/html/static
-#      - static_volume:/education_platform/static
+      - .:/education_platform
+      # - static_volume:/usr/share/nginx/html/static
+      - static_volume:/education_platform/static
 #      - media_volume:/education_platform/media
     ports:
       - "80:80"
-    command: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
+    # command: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
+    networks:
+      - education_network
     depends_on:
       - web
 
 volumes:
   static_volume:
 #  media_volume:
+
+
+networks:
+  education_network:
+    driver: bridge

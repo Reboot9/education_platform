@@ -1,17 +1,11 @@
 #!/bin/sh
-set -e
-until cd /education_platform
-do
-  echo "Wait for server volume..."
-done
 
-# Adjust the path to manage.py based on its new location
-until python manage.py migrate
-do
-  echo "Waiting for postgres ready"
-done
+# wait for Postgres
+/wait-for-it.sh $POSTGRES_HOST:$POSTGRES_PORT -t 60
+
+# run migrations, collect media, start the server
+python manage.py migrate
+echo "yes" | python manage.py collectstatic --noinput
 
 
-python manage.py collectstatic --noinput
-
-RUN gunicorn education_platform.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
+exec $@
