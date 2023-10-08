@@ -13,7 +13,7 @@ COPY pyproject.toml poetry.lock docker-entrypoint.sh ./
 
 RUN poetry install --no-interaction --no-ansi --no-dev
 
-COPY . /education_platform
+COPY . .
 
 EXPOSE 8000
 RUN chmod +x wait-for-it.sh

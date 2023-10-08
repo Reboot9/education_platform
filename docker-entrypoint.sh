@@ -5,7 +5,8 @@
 
 # run migrations, collect media, start the server
 python manage.py migrate
-echo "yes" | python manage.py collectstatic --noinput
+
+python manage.py collectstatic --noinput
 
 
 exec $@
