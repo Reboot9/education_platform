@@ -7,7 +7,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - education_network
 
@@ -29,9 +29,9 @@ services:
     volumes:
       - .:/education_platform
       - static_volume:/education_platform/static
-      # - media_volume:/education_platform/media
-    ports:
-      - "8000:8000"
+      - media_volume:/education_platform/media
+    expose:
+      - 8000
     networks:
       - education_network
     depends_on:
@@ -45,21 +45,21 @@ services:
       context: .
       dockerfile: ./config/nginx/Dockerfile
     volumes:
-      # - ./config/nginx:/etc/nginx/templates
-      - ./config/nginx/conf.d:/etc/nginx/conf.d/default.conf
+      # - ./config/nginx/nginx.conf:/etc/nginx/conf.d
       # - .:/education_platform
       - static_volume:/education_platform/static
-#      - media_volume:/education_platform/media
+      - media_volume:/education_platform/media
     ports:
-      - "80:80"
+      - "1336:80"
     networks:
       - education_network
     depends_on:
       - web
 
 volumes:
+  postgres_data:
   static_volume:
-#  media_volume:
+  media_volume:
 
 
 networks:
