@@ -49,8 +49,10 @@ services:
       # - .:/education_platform
       - static_volume:/education_platform/static
       - media_volume:/education_platform/media
+      - ./ssl:/ssl
     ports:
-      - "1336:80"
+      - "80:80"
+      - "443:443"
     networks:
       - education_network
     depends_on:

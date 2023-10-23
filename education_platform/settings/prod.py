@@ -8,7 +8,7 @@ ADMINS = [
     ('Admin', 'admin@example.com'),
 ]
 
-ALLOWED_HOSTS = ['*', ]
+ALLOWED_HOSTS = ['localhost', ]
 
 DATABASES = {
     'default': {
@@ -26,3 +26,9 @@ STATIC_ROOT = BASE_DIR / 'static'
 REDIS_URL = 'redis://cache:6379'
 CACHES['default']['LOCATION'] = REDIS_URL
 CHANNEL_LAYERS['default']['CONFIG']['hosts'] = [REDIS_URL]
+
+# Security
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
