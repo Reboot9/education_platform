@@ -24,3 +24,6 @@ RUN chmod +x docker-entrypoint.sh
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
 CMD ["gunicorn", "education_platform.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "4", "--threads", "4"]
+
+#CMD ["daphne", "-u", "/education_platform/daphne.sock", "education_platform.asgi:application", "-p", "8001"]
+# CMD ["daphne", "-b", "0.0.0.0", "-p", "8001", "education_platform.asgi:application"]

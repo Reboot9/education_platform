@@ -57,6 +57,22 @@ services:
       - education_network
     depends_on:
       - web
+      - daphne
+
+  daphne:
+    restart: unless-stopped
+    build: .
+    command: [ "daphne", "-b", "0.0.0.0", "-p", "8001",
+               "education_platform.asgi:application" ]
+    env_file:
+      - ./.env
+    volumes:
+      - .:/education_platform
+    networks:
+      - education_network
+    depends_on:
+      - db
+      - cache
 
 volumes:
   postgres_data:
