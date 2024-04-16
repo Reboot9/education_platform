@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect
-from .models.other_models import Course
+from .models.main_models import Course
 
 
 def subdomain_course_middleware(get_response):

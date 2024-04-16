@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from courses.models.other_models import Subject, Course, Module
+from courses.models.main_models import Subject, Course, Module
 
 
 @admin.register(Subject)
@@ -15,8 +15,8 @@ class ModuleInline(admin.StackedInline):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'subject', 'created']
-    list_filter = ['created', 'subject']
+    list_display = ['title', 'subject', 'owner', 'created']
+    list_filter = ['created', 'subject',]
     search_fields = ['title', 'overview']
     prepopulated_fields = {'slug': ('title',)}
     inlines = [ModuleInline]

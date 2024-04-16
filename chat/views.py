@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic import DetailView
 
-from courses.models.other_models import Course
+from courses.models.main_models import Course
 
 
 class CourseChatRoom(LoginRequiredMixin, DetailView):

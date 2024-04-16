@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import socket
 from pathlib import Path
 
 from django.urls import reverse_lazy
@@ -64,7 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'courses.middleware.subdomain_course_middleware'
+    # 'courses.middleware.subdomain_course_middleware'
 ]
 
 ROOT_URLCONF = 'education_platform.urls'
@@ -166,9 +167,33 @@ CACHES = {
     }
 }
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
+# INTERNAL_IPS = [
+#     '127.0.0.1',
+# ]
+
+
+def get_internal_ips() -> list[str]:
+    """
+    Get internal IPs required for Django Debug Toolbar in a Docker environment.
+
+    Returns:
+        list: List of internal IP addresses.
+    """
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    internal_ips = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
+
+    # Since our requests will be routed to Django via the nginx container, include
+    # the nginx IP address as internal as well
+    try:
+        nginx_hostname, _, nginx_ips = socket.gethostbyname_ex("nginx")
+        internal_ips += nginx_ips
+    except socket.gaierror:
+        # since nginx may not be started at the point that this is first executed.
+        pass
+    return internal_ips
+
+
+INTERNAL_IPS = get_internal_ips()
 
 CACHE_MIDDLEWARE_ALIAS = 'default'
 CACHE_MIDDLEWARE_SECONDS = 60 * 15  # 15 minutes

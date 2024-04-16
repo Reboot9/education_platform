@@ -15,7 +15,12 @@
                 <a href="{% url "course_list_subject" subject.slug %}">
                     {{ subject.title }}</a>.
                 {{ object.modules.count }} modules.
-                Instructor: {{ object.owner.get_full_name }}
+                Instructor:
+                {% if object.owner.get_full_name %}
+                    {{ object.owner.get_full_name }}
+                {% else %}
+                    {{ object.owner.username }}
+                {% endif %}
             </p>
             {{ object.overview|linebreaks }}
             {% if request.user.is_authenticated %}

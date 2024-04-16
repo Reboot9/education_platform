@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, ListView, DetailView
 
-from courses.models.other_models import Course
+from courses.models.main_models import Course
 from students.forms import CourseEnrollForm
 
 
@@ -51,6 +51,16 @@ class StudentCourseListView(LoginRequiredMixin, ListView):
 class StudentCourseDetailView(DetailView):
     model = Course
     template_name = 'students/course/detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+
+        # Check if the user is not enrolled in the course
+        if not self.object.students.filter(id=request.user.id).exists():
+            # Redirect the user to the enroll page
+            return redirect('student_enroll_course')
+
+        return response
 
     def get_queryset(self):
         qs = super().get_queryset()

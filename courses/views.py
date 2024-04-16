@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.db.models import Count
 from django.forms import modelform_factory
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import TemplateResponseMixin, View
 from django.views.generic.edit import CreateView, \
@@ -18,7 +19,7 @@ from courses.api.permissions import IsEnrolled
 from courses.api.serializers import SubjectSerializer, CourseSerializer, CourseWithContentsSerializer
 from courses.forms import ModuleFormSet
 from courses.mixins import OwnerCourseMixin, OwnerCourseEditMixin
-from courses.models.other_models import Course, Module, Content, Subject
+from courses.models.main_models import Course, Module, Content, Subject
 from students.forms import CourseEnrollForm
 
 
@@ -31,19 +32,60 @@ class CourseCreateView(OwnerCourseEditMixin, CreateView):
     permission_required = 'courses.add_course'
 
 
-class CourseListView(ListView):
+# class CourseListView(ListView):
+#     model = Course
+#     template_name = 'course/list.html'
+#     context_object_name = 'courses'
+#
+#     def get_queryset(self):
+#         all_courses = Course.objects.annotate(
+#             total_modules=Count('modules')
+#         )
+#
+#         subject_slug = self.kwargs.get('subject')
+#         if subject_slug:
+#             subject = get_object_or_404(Subject, slug=subject_slug)
+#             key = f'subject_{subject.id}_courses'
+#             courses = cache.get(key)
+#             if not courses:
+#                 courses = all_courses.filter(subject=subject)
+#                 cache.set(key, courses)
+#         else:
+#             courses = cache.get('all_courses')
+#             if not courses:
+#                 courses = all_courses
+#                 cache.set('all_courses', courses)
+#
+#         return courses
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['subjects'] = cache.get('all_subjects')
+#         if not context['subjects']:
+#             context['subjects'] = Subject.objects.annotate(
+#                 total_courses=Count('courses')
+#             )
+#             cache.set('all_subjects', context['subjects'])
+#
+#         subject = self.kwargs.get('subject')
+#         if subject:
+#             context['subject'] = get_object_or_404(Subject, slug=subject)
+#
+#         return context
+class CourseListView(TemplateResponseMixin, View):
     model = Course
     template_name = 'course/list.html'
     context_object_name = 'courses'
-
-    def get_queryset(self):
+    def get(self, request, subject=None):
+        subjects = cache.get('all_subjects')
+        if not subjects:
+            subjects = Subject.objects.annotate(
+                            total_courses=Count('courses'))
+            cache.set('all_subjects', subjects)
         all_courses = Course.objects.annotate(
-            total_modules=Count('modules')
-        )
-
-        subject_slug = self.kwargs.get('subject')
-        if subject_slug:
-            subject = get_object_or_404(Subject, slug=subject_slug)
+                        total_modules=Count('modules'))
+        if subject:
+            subject = get_object_or_404(Subject, slug=subject)
             key = f'subject_{subject.id}_courses'
             courses = cache.get(key)
             if not courses:
@@ -54,28 +96,31 @@ class CourseListView(ListView):
             if not courses:
                 courses = all_courses
                 cache.set('all_courses', courses)
-
-        return courses
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['subjects'] = cache.get('all_subjects')
-        if not context['subjects']:
-            context['subjects'] = Subject.objects.annotate(
-                total_courses=Count('courses')
-            )
-            cache.set('all_subjects', context['subjects'])
-
-        subject = self.kwargs.get('subject')
-        if subject:
-            context['subject'] = get_object_or_404(Subject, slug=subject)
-
-        return context
+        return self.render_to_response({'subjects': subjects,
+                                        'subject': subject,
+                                        'courses': courses})
 
 
 class CourseDetailView(DetailView):
     model = Course
     template_name = 'course/detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if the user is already enrolled in the course
+        if self.get_object().students.filter(id=request.user.id).exists():
+            return redirect('student_course_detail', pk=self.get_object().pk)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    # def get_object(self, queryset=None):
+    #     course_object = super().get_object(queryset=queryset)
+    #
+    #     # Check if the user is already enrolled in the course
+    #     if self.request.user in course_object.students.all():
+    #         # If the user is already enrolled, redirect to the student_course_detail
+    #         return redirect(reverse('student_course_detail', args=[course_object.pk]))
+    #
+    #     return course_object
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
