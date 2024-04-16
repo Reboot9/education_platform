@@ -27,7 +27,7 @@ class Course(models.Model):
                                 on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
-    overview = models.TextField(max_length=4000)
+    overview = models.TextField(max_length=4000, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     students = models.ManyToManyField(User, related_name='courses_joined', blank=True)
 
