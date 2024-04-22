@@ -13,10 +13,13 @@
     <ul class="menu">
         {% if request.user.is_authenticated %}
             <li><a href="{% url "student_course_list" %}">Available Courses</a></li>
-            <li><a href="{% url "manage_course_list" %}">Manage Courses</a></li>
+            {% if request.user.groups.all.0.name == "Instructors" or request.user.is_superuser %}
+                <li><a href="{% url 'manage_course_list' %}">Manage Courses</a></li>
+            {% endif %}
             <li><a href="{% url "logout" %}">Sign out</a></li>
         {% else %}
             <li><a href="{% url "login" %}">Sign in</a></li>
+            <li><a href="{% url "student_registration" %}">Register</a></li>
         {% endif %}
     </ul>
 </div>

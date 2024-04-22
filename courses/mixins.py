@@ -9,6 +9,8 @@ class OwnerMixin:
 
     def get_queryset(self):
         """Return queryset filtered by the request user as the owner."""
+        qs = super().get_queryset()
+        return qs.filter(owner=self.request.user)
 
 
 class OwnerEditMixin:

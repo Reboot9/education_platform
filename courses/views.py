@@ -31,6 +31,12 @@ class ManageCourseListView(OwnerCourseMixin, ListView):
 class CourseCreateView(OwnerCourseEditMixin, CreateView):
     permission_required = 'courses.add_course'
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Clear the cache after creating a new course
+        cache.delete("all_courses")
+        return response
+
 
 # class CourseListView(ListView):
 #     model = Course
@@ -76,6 +82,7 @@ class CourseListView(TemplateResponseMixin, View):
     model = Course
     template_name = 'course/list.html'
     context_object_name = 'courses'
+
     def get(self, request, subject=None):
         subjects = cache.get('all_subjects')
         if not subjects:
@@ -134,10 +141,31 @@ class CourseDetailView(DetailView):
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):
     permission_required = 'courses.change_course'
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        cache.delete('all_subjects')
+        cache.delete("all_courses")
+        if self.object.subject:
+            key = f'subject_{self.object.subject.id}_courses'
+            cache.delete(key)
+        return response
+
 
 class CourseDeleteView(OwnerCourseEditMixin, DeleteView):
     template_name = 'manage/course/delete.html'
     permission_required = 'courses.delete_course'
+
+    def delete(self, request, *args, **kwargs):
+        subject = self.get_object().subject
+        response = super().delete(request, *args, **kwargs)
+
+        cache.delete('all_subjects')
+        cache.delete("all_courses")
+        if subject:
+            key = f'subject_{subject.id}_courses'
+            cache.delete(key)
+        return response
 
 
 class CourseModuleFormView(FormView):
@@ -168,6 +196,13 @@ class CourseModuleFormView(FormView):
 
         if formset.is_valid():
             formset.save()
+
+            # Clear the cache after saving the formset
+            cache.delete('all_subjects')
+            cache.delete("all_courses")
+            if self.course.subject:
+                key = f'subject_{self.course.subject.id}_courses'
+                cache.delete(key)
 
             return redirect('manage_course_list')
 
@@ -221,6 +256,13 @@ class ContentCreateUpdateView(TemplateResponseMixin, View):
             obj.owner = request.user
             obj.save()
 
+            # Clear the cache after creating or updating content
+            cache.delete('all_subjects')
+            cache.delete("all_courses")
+            if self.module.course.subject:
+                key = f'subject_{self.module.course.subject.id}_courses'
+                cache.delete(key)
+
             if not id_:
                 # new content
                 Content.objects.create(module=self.module, item=obj)
@@ -240,6 +282,13 @@ class ContentDeleteView(View):
         module = content.module
         content.item.delete()
         content.delete()
+
+        # Clear the cache after deleting content
+        cache.delete('all_subjects')
+        cache.delete("all_courses")
+        if module.course.subject:
+            key = f'subject_{module.course.subject.id}_courses'
+            cache.delete(key)
 
         return redirect('module_content_list', module.id)
 
